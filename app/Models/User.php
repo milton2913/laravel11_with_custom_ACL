@@ -9,7 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-
+use Carbon\Carbon;
+use DateTimeInterface;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
     use HasApiTokens;
@@ -17,7 +21,7 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
-
+    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -27,6 +31,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'email_verified_at',
+        'remember_token',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     /**
@@ -62,4 +71,42 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->roles()->where('id', 1)->exists();
+    }
+
+    public function getEmailVerifiedAtAttribute($value)
+    {
+        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+    }
+
+    public function setEmailVerifiedAtAttribute($value)
+    {
+        $this->attributes['email_verified_at'] = $value ? Carbon::createFromFormat(config('panel.date_format') . ' ' . config('panel.time_format'), $value)->format('Y-m-d H:i:s') : null;
+    }
+
+    public function setPasswordAttribute($input)
+    {
+        if ($input) {
+            $this->attributes['password'] = app('hash')->needsRehash($input) ? Hash::make($input) : $input;
+        }
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPassword($token));
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
 }
