@@ -14,6 +14,7 @@ use DateTimeInterface;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Hash;
 class User extends Authenticatable
 {
     use HasApiTokens;
