@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PermissionsController;
 use App\Http\Controllers\Admin\RolesController;
 use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Admin\AuditLogsController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -27,5 +28,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     // Users
     Route::delete('users/destroy', [UsersController::class,'massDestroy'])->name('users.massDestroy');
 
+    // Audit Logs
+//    Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update', 'destroy']]);
+    Route::get('audit-logs', [AuditLogsController::class, 'index'])->name('audit-logs.index');
+    Route::get('audit-logs/{audit_log}', [AuditLogsController::class, 'show'])->name('audit-logs.show');
+//    Route::delete('audit-logs/{audit_log}', [AuditLogsController::class, 'destroy'])->name('audit-logs.destroy');
 });
 

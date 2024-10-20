@@ -1,14 +1,14 @@
 <?php
 
 namespace App\Models;
-
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 class Role extends Model
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory,Auditable;
 
     public $table = 'roles';
 
